@@ -20,11 +20,22 @@ class OneCli:
         while True:
             data = self.conn.recv(1024)
             if not data:
+                print 'Error in', self.conn
+                self.conn.close()
+                self.sockList.remove(self.conn)
                 break
             elif data == 'quit':
                 print 'disconnet', self.conn
+                self.sockList.remove(self.conn)
             else:
-                print 'Get :', repr(data)
+                print 'Get :', repr(data) # sending
+                for cli in sockList:
+                    try:
+                        cli.send(repr(data))
+                    except Exception as e:
+                        print e.message
+                        cli.close()
+                        self.sockList.remove(cli)
         self.conn.close()
 
 
@@ -65,3 +76,5 @@ while True:
     threading._start_new_thread(gettingMsg, ())
     '''
     conn_cli = OneCli(conn, sockList)
+
+sock.close()
