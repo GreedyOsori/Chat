@@ -1,37 +1,53 @@
 from socket import *
 import threading
-import signal
-
+from Message import Message
 
 class Server:
+
     def __init__(self):
+
         self.server_sock = socket(AF_INET, SOCK_STREAM)
-        self.server_sock.bind(("127.0.0.1", 9094))
+        self.server_sock.bind(("127.0.0.1", 9097))
         self.server_sock.listen(5)
+
+        self.client_list = {}
+        self.client_list['room1'] = []
+        self.client_list['room2'] = []
+        self.client_list['room3'] = []
+
         print 'Server socket setting is done!!\n'
 
-        self.shared_buf = ''
+    def broadcast(self, client_sock, num_room, message):
+        # client_list have ( sock, addr_info, name )
+        # message have ( num_room, name, msg )
 
-        self.client_list = []
-
-
-    def broadcast(self, client_sock):
-        for i in self.client_list:
+        for i in self.client_list[num_room]:
             if(i[0] != client_sock):
-                i[0].send(self.shared_buf)
+                try:
+                    i[0].send(message)
+                except Exception as e:
+                    print e.message
+                    i[0].close()
+                    self.client_list[num_room].remove(i)
 
-    def serve_client(self, client_sock, client_info):
-        print 'work for client'
+    def serve_client(self, client_sock, client_addr):
+        # "recv num_room'#'name'#'msg"
+        message = client_sock.recv(128)
+        room, name, msg = message.split('#')
 
-        #signal.signal(signal.SIGUSR1, lambda client_sock : client_sock.send(self.shared_buf))
+        self.client_list[room].append((client_sock,client_addr,name))
         while True:
-            self.shared_buf = client_sock.recv(128)
-            print self.shared_buf
-            self.broadcast(client_sock)
-            #signal.siginterrupt(signal.SIGUSR1, False)
-            # if it is not main thread, we cannot do things related to signal
+            try:
+                message = client_sock.recv(128)
+                if not message:
+                    self.client_list[room].remove((client_sock,client_addr,name))
+                    client_sock.close()
+                    return
+            except Exception as e:
+                print e.message
+                client_sock.close()
 
-
+            self.broadcast(client_sock, room, message)
 
     def do(self):
         while True:
@@ -39,23 +55,12 @@ class Server:
             client = self.server_sock.accept()
             print 'welcome client!!\n'
 
-            self.client_list.append(client)
             client_th = threading.Thread(target=self.serve_client,args = client)
             client_th.start()
+
+        client_th.join()
 
 
 server = Server()
 server.do()
-
-
-
-
-
-
-
-
-
-
-
-
 
