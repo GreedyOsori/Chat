@@ -1,41 +1,77 @@
-# -*- coding:utf-8 -*-
-import socket
-import sys
-from thread import *
+# -*- encoding: utf-8 -*-
+from socket import *
+import threading
 
-HOST = '' # all available interfaces
-PORT = 3223
+class Server:
+    def __init__(self):
+        # Set up socket
+        self.server_sock = socket(AF_INET, SOCK_STREAM)
+        self.server_sock.bind(("127.0.0.1", 5021))
+        self.server_sock.listen(5)
+        print 'Server socket setting is done!!'
 
-list = [1,2,3,4]
+        #initialize vals
+        self.shared_buf = ''  #메세지 저장 버퍼
+        self.cID = ''  # Client ID 부여, 버퍼?
+        self.rNum = 0  # Room number, default 0
+        self.room = {}
 
-for l in list[:]:
-    if l % 2 == 0:
-        list.remove(l)
+    def broadcast(self, client):
+        for k in self.room.keys():
+            if self.room[k] == self.rNum:
+                if self.shared_buf == "bye":
+                    k.send(self.shared_buf)
+                    k.send('\nClient %s disconnected' % self.cID)
+                    k.remove(client)
+                    self.p_dic()
+                else:
+                    if k != client:
+                        k.send(self.shared_buf)
 
-#소켓 생성
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.bind((HOST, PORT))
-sock.listen(5) #Waiting MAX 5 clients
-clients = []
-print 'Welcome to the server.'
+    def p_dic(self):
+        for k in sorted(self.room.keys()):
+            print 'Key:', k, '->', self.room[k]
 
-#Function for handling connections.
-def clientThread(conn, clients):
-    while 1:
-        #Receive from client
-        data = conn.recv(1024)
-        received = str(data)
-        for i in clients:
-            i.send("Received " + data + "\n")
-    conn.close()
+    def serve_client(self, client_sock, num):
+        self.cID = client_sock.recv(128)
+        self.rNum = client_sock.recv(128)
+        self.room[client_sock] = self.rNum
+        client_sock.send('Welcome to room%s' % self.rNum)
 
-while 1:
-    conn, addr = sock.accept()
-    clients.append(conn)
-    print 'Connected with ' + addr[0] + ':' + str(addr[1])
-    start_new_thread(clientThread, (conn, clients))
+        for k in self.room.keys():
+            if self.room[k] == self.rNum:
+                if k != client_sock:
+                    k.send('%s is Invited' % self.cID)
+        while True:
+            self.shared_buf = client_sock.recv(1024)
+            print self.shared_buf
+            self.broadcast(client_sock)
 
-sock.close()
-sys.exit()
+    def do(self):
+        while True:
+            try:
+                client = self.server_sock.accept()
+                client_th = threading.Thread(target=self.serve_client, args=client)
+                client_th.start()
+            except Exception, e:
+                print e
+
+
+if __name__ == '__main__':
+    try:
+        server = Server()
+        server.do()
+    except KeyboardInterrupt:
+        print 'Quited'
+
+
+
+
+
+
+
+
+
+
 
 
