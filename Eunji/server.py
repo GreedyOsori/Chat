@@ -6,6 +6,12 @@ from thread import *
 HOST = '' # all available interfaces
 PORT = 3223
 
+list = [1,2,3,4]
+
+for l in list[:]:
+    if l % 2 == 0:
+        list.remove(l)
+
 #소켓 생성
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.bind((HOST, PORT))

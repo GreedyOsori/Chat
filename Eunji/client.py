@@ -27,4 +27,3 @@ if __name__ == '__main__':
         #Now receive data
         received = sock.recv(4096)
         print received
-
