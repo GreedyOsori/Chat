@@ -5,7 +5,6 @@ from Message import Message
 class Server:
 
     def __init__(self):
-
         self.server_sock = socket(AF_INET, SOCK_STREAM)
         self.server_sock.bind(("127.0.0.1", 9097))
         self.server_sock.listen(5)
