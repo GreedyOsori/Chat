@@ -63,15 +63,3 @@ if __name__ == '__main__':
         server.do()
     except KeyboardInterrupt:
         print 'Quited'
-
-
-
-
-
-
-
-
-
-
-
-

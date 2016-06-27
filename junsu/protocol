@@ -1,0 +1,12 @@
+{
+    "id" = [usr_id]
+    "action" = [ create
+                    | join
+                    | send_msg
+                    | broadcast
+                    | exit
+                    | out
+
+               ]
+    "action_value" = "oo"
+}
