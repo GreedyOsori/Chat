@@ -1,8 +1,7 @@
 from socket import *
 import threading
 import m_format
-
-BUF_SIZE = 256
+import time
 
 class Client:
 
@@ -15,18 +14,27 @@ class Client:
         self.id = ''
 
     def __write_th(self):
-        message = {"id":self.id, "action":'', "action_value":''}
         while True:
             try:
                 msg = raw_input()
-                if msg == "exit":
-                    pass
-                    break
-                message["id"] = self.id
+                m = m_format.dump(self.id, msg)
 
-                self.client_sock.send(message)
+                self.client_sock.send(m)
+
+                msg = m_format.load(m)
+                if msg[m_format.ACTION] == m_format.EXIT:
+
+                    ## same ip addr can be accepted in this test
+                    ## so can't set d_client_info's key - client_addr //
+                    ## but if key is client_sock,
+                    ## in case that cleint_sock close first, and server refer socket
+                    ## it'll have trash val
+                    ## so sleep ....
+                    time.sleep(2)
+                    self.client_sock.close()
+
             except Exception as e:
-                print e.message
+                print (e.message)
                 self.client_sock.close()
                 return
 
@@ -34,11 +42,25 @@ class Client:
         while True:
             try:
                 msg = self.client_sock.recv(m_format.BUF_SIZE)
-                message = msg.split('#')
+                if msg == '':
+                    time.sleep(2)
+                    self.client_sock.close()
+                    return
 
-                print "%s : %s"%(message[1], message[2])
+                m = m_format.load(msg)
+                if m[m_format.ACTION] == m_format.SEND_MSG:
+                    print "%s : %s" % (m[m_format.ID], m[m_format.ACTION_VAL])
+                    pass
+                elif m[m_format.ACTION] == m_format.BROADCAST:
+                    print "BROADCAST : %s" %m[m_format.ACTION_VAL]
+                    pass
+                elif m[m_format.ACTION] == m_format.SYS_MSG:
+                    print "[!!] %s" % m[m_format.ACTION_VAL]
+                else:
+                    pass
+
             except Exception as e:
-                print e.message
+                print (e.message)
                 self.client_sock.close()
                 return
 
@@ -50,14 +72,14 @@ class Client:
         ## set usr id
         ## create or join room
         try:
-            self.client_sock.connect(('127.0.0.1', 9097))
+            self.client_sock.connect(('127.0.0.1', m_format.PORT))
+
+            #### create or join room
+            ## recv room info
+            print self.client_sock.recv(m_format.BUF_SIZE)
 
             ## set usr id
             self.__set_user_info()
-            #### create or join room
-
-            ## recv room info
-            self.client_sock.recv(m_format.BUF_SIZE)
 
             ## recv accepted or denied
             msg = {m_format.ID : self.id, m_format.ACTION : '', m_format.ACTION_VAL : ''}
@@ -78,19 +100,19 @@ class Client:
                         continue
                 else:
                     self.client_sock.close()
-                    return false
+                    return False
 
-            return true
+            return True
 
         except Exception as e:
-            print e.message
+            print (e.message)
 
     def do(self):
         if self.__connect():
             self.write_thread.start()
             self.read_thread.start()
         else:
-            return false
+            return False
 
 client = Client()
 client.do()
