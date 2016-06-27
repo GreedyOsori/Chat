@@ -5,6 +5,7 @@ import m_format
 BUF_SIZE = 256
 
 class Client:
+
     def __init__(self):
         self.client_sock = socket(AF_INET, SOCK_STREAM)
 
@@ -26,13 +27,13 @@ class Client:
                 self.client_sock.send(message)
             except Exception as e:
                 print e.message
-                self.__close()
+                self.client_sock.close()
                 return
 
     def __read_th(self):
         while True:
             try:
-                msg = self.client_sock.recv(128)
+                msg = self.client_sock.recv(m_format.BUF_SIZE)
                 message = msg.split('#')
 
                 print "%s : %s"%(message[1], message[2])
@@ -53,24 +54,43 @@ class Client:
 
             ## set usr id
             self.__set_user_info()
-            ## create or join room
+            #### create or join room
+
+            ## recv room info
             self.client_sock.recv(m_format.BUF_SIZE)
 
+            ## recv accepted or denied
+            msg = {m_format.ID : self.id, m_format.ACTION : '', m_format.ACTION_VAL : ''}
             while True:
+                room = raw_input(self.id+" : ")
+                m = m_format.dump(self.id, room)
+                self.client_sock.send(m)
 
-                pass
+                msg = self.client_sock.recv(m_format.BUF_SIZE)
+                m = m_format.load(msg)
+                action = m[m_format.ACTION]
+                action_val = m[m_format.ACTION_VAL]
+
+                if action == m_format.SYS_MSG:
+                    if action_val == 'accepted':
+                        break
+                    elif action_val == 'denied':
+                        continue
+                else:
+                    self.client_sock.close()
+                    return false
+
+            return true
 
         except Exception as e:
             print e.message
 
-    def __close(self):
-        self.client_sock.close()
     def do(self):
-
-        self.__connect()
-
-        self.write_thread.start()
-        self.read_thread.start()
+        if self.__connect():
+            self.write_thread.start()
+            self.read_thread.start()
+        else:
+            return false
 
 client = Client()
 client.do()
