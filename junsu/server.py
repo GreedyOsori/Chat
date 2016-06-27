@@ -3,7 +3,6 @@ import threading
 import m_format
 import message
 
-
 class Server:
     def __init__(self):
         HOST = ''
@@ -20,7 +19,13 @@ class Server:
         print ('Ready!!!')
 
     def __broadcast(self, client_sock, msg):
-        pass
+        for room in self.d_room_client:
+            for c_sock, c_addr in self.d_room_client[room]:
+                try:
+                    c_sock.send(msg)
+                except Exception as e:
+                    print e.message
+                    self.__handle_client_exit()
 
     def __send_to_room(self, client_sock, msg):
 
@@ -28,7 +33,6 @@ class Server:
         c_id, room, master = self.d_client_info[client_sock]
 
         print msg
-
         # client = { room_num : [](client_list)}
         for c_sock, c_addr in self.d_room_client[room]:
             if c_sock != client_sock:
@@ -65,7 +69,7 @@ class Server:
                     msg = m_format.dump('', "sys_msg#accepted")
                     client_sock.send(msg)
                     self.d_room_client[action_val] = [(client_sock, client_addr)]
-                    self.d_client_info[client_sock] = (c_id , action_val, True)
+                    self.d_client_info[client_sock] = (c_id, action_val, True)
                     return True
 
                 elif action == m_format.JOIN:
@@ -93,9 +97,13 @@ class Server:
             client_sock.close()
 
     def __handle_client_exit(self, client_sock, client_addr):
+        print client_sock
         c_id, room, master = self.d_client_info[client_sock]
         self.d_room_client[room].remove((client_sock, client_addr))
         self.d_client_info.pop(client_sock)
+
+        if len(self.d_room_client[room]) == 0:
+            self.d_room_client.pop(room)
         client_sock.close()
 
     def __serve_client(self, client_sock, client_addr):
@@ -127,12 +135,13 @@ class Server:
                     msg = m_format.dump(m[m_format.ID], "sys_msg#"+m[m_format.ID]+" quit chatting")
                     self.__send_to_room(client_sock, msg)
                     self.__handle_client_exit(client_sock, client_addr)
+                    return
                 elif action == m_format.OUT:
                     pass
 
             except Exception as e:
                 print (e.message)
-                self.__handle_client_exit(client_sock,client_addr)
+                self.__handle_client_exit(client_sock, client_addr)
 
     def do(self):
         while True:

@@ -26,9 +26,6 @@ BUF_SIZE = 256
 def dump(id, message):
     p = str(message).split('#')
 
-    ##debug
-    print p
-
     if (p[0] == 'out') | (p[0] == 'exit') | (p[0] == 'broadcast') | (p[0] == 'create') | (p[0] == 'join') | (p[0] == 'sys_msg'):
         return json.dumps({ID: id, ACTION: p[0], ACTION_VAL: p[1]})
     else:

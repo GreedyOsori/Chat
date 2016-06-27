@@ -52,7 +52,7 @@ class Client:
                     print "%s : %s" % (m[m_format.ID], m[m_format.ACTION_VAL])
                     pass
                 elif m[m_format.ACTION] == m_format.BROADCAST:
-                    print "BROADCAST : %s" %m[m_format.ACTION_VAL]
+                    print "BROADCAST : %s" % m[m_format.ACTION_VAL]
                     pass
                 elif m[m_format.ACTION] == m_format.SYS_MSG:
                     print "[!!] %s" % m[m_format.ACTION_VAL]
