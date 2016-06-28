@@ -3,6 +3,7 @@ import threading
 import m_format
 import message
 
+
 class Server:
     def __init__(self):
         HOST = ''
@@ -18,17 +19,16 @@ class Server:
         print ('Server socket is binded... ')
         print ('Ready!!!')
 
-    def __broadcast(self, client_sock, msg):
+    def __broadcast(self, msg):
         for room in self.d_room_client:
             for c_sock, c_addr in self.d_room_client[room]:
                 try:
                     c_sock.send(msg)
                 except Exception as e:
                     print e.message
-                    self.__handle_client_exit()
+                    self.__handle_client_exit(c_sock, c_addr)
 
     def __send_to_room(self, client_sock, msg):
-
         ## msg is already formatted
         c_id, room, master = self.d_client_info[client_sock]
 
@@ -40,14 +40,40 @@ class Server:
                     c_sock.send(msg)
                 except Exception as e:
                     print (e.message)
-                    self.__handle_client_exit()
+                    self.__handle_client_exit(c_sock, c_addr)
+
+    def __out(self, client_sock, c_id, msg):
+
+        ## debug
+        print c_id + ' is targetted!!'
+
+        t_id, t_room, t_master = self.d_client_info[client_sock]
+        if not t_master:
+            msg = m_format.dump('', 'sys_msg#Permission denied')
+            client_sock.send(msg)
+            return
+
+        for c_sock, c_addr in self.d_room_client[t_room]:
+
+            ## debug
+            print 'erasef asefasdfsdafaf'
+            if c_id in self.d_client_info[c_sock]:
+                print 'before s t r'
+                self.__send_to_room(client_sock, msg)
+                client_sock.send(msg)
+                self.__handle_client_exit(c_sock, c_addr)
+                return
+
+        msg = m_format.dump('', 'sys_msg#There is no user ' + c_id)
+        client_sock.send(msg)
+        pass
 
     ## return Bool : True or False
     def __accept_client(self, client_sock, client_addr):
         try:
-            ## debug
 
-            tmp_m = "room list : " + str(self.d_room_client.keys()) + "\ncreate room : ex) create#room_name\njoin room : ex) join#room_name\nexit : ex) exit#"
+            tmp_m = "room list : " + str(
+                self.d_room_client.keys()) + "\ncreate room : ex) create#room_name\njoin room : ex) join#room_name\nexit : ex) exit#"
             client_sock.send(tmp_m)
 
             while True:
@@ -63,10 +89,10 @@ class Server:
                 if action == m_format.CREATE:
                     ## if room name is already exist
                     if action_val in self.d_room_client.keys():
-                        msg = m_format.dump('', "sys_msg#denied")
+                        msg = m_format.dump('', m_format.SYS_MSG+m_format.DELIM+m_format.DENIED)
                         client_sock.send(msg)
                         continue
-                    msg = m_format.dump('', "sys_msg#accepted")
+                    msg = m_format.dump('', m_format.SYS_MSG+m_format.DELIM+m_format.ACCEPTED)
                     client_sock.send(msg)
                     self.d_room_client[action_val] = [(client_sock, client_addr)]
                     self.d_client_info[client_sock] = (c_id, action_val, True)
@@ -74,13 +100,13 @@ class Server:
 
                 elif action == m_format.JOIN:
                     if action_val in self.d_room_client.keys():
-                        msg = m_format.dump('', "sys_msg#accepted")
+                        msg = m_format.dump('', m_format.SYS_MSG+m_format.DELIM+m_format.ACCEPTED)
                         client_sock.send(msg)
                         self.d_room_client[action_val].append((client_sock, client_addr))
                         self.d_client_info[client_sock] = (c_id, action_val, False)
                         return True
                     else:
-                        msg = m_format.dump('', "sys_msg#denied")
+                        msg = m_format.dump('', m_format.SYS_MSG+m_format.DELIM+m_format.DENIED)
                         client_sock.send(msg)
                         continue
 
@@ -88,8 +114,9 @@ class Server:
                     client_sock.close()
                     return False
                 else:
-                    msg = m_format('', "sys_msg#denied")
+                    msg = m_format.dump('', m_format.SYS_MSG+m_format.DELIM+m_format.DENIED)
                     client_sock.send(msg)
+                    continue
 
         except Exception as e:
             print "erororoorororororoor"
@@ -132,11 +159,13 @@ class Server:
                 elif action == m_format.BROADCAST:
                     self.__broadcast(client_sock, msg)
                 elif action == m_format.EXIT:
-                    msg = m_format.dump(m[m_format.ID], "sys_msg#"+m[m_format.ID]+" quit chatting")
+                    msg = m_format.dump(m[m_format.ID], m_format.SYS_MSG+m_format.DELIM + m[m_format.ID] + " quit chatting")
                     self.__send_to_room(client_sock, msg)
                     self.__handle_client_exit(client_sock, client_addr)
                     return
                 elif action == m_format.OUT:
+                    msg = m_format.dump(m[m_format.ID], m_format.SYS_MSG+m_format.DELIM + m[m_format.ACTION_VAL] + " is forced to exit")
+                    self.__out(client_sock, m[m_format.ACTION_VAL], msg)
                     pass
 
             except Exception as e:

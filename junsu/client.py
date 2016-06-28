@@ -3,6 +3,7 @@ import threading
 import m_format
 import time
 
+
 class Client:
 
     def __init__(self):
@@ -57,7 +58,7 @@ class Client:
                 elif m[m_format.ACTION] == m_format.SYS_MSG:
                     print "[!!] %s" % m[m_format.ACTION_VAL]
                 else:
-                    pass
+                    print "Unexpected message ;;"
 
             except Exception as e:
                 print (e.message)
@@ -65,7 +66,13 @@ class Client:
                 return
 
     def __set_user_info(self):
-        id = raw_input("input your name : ")
+        while True:
+            id = raw_input("input your name : ")
+            if '#' in id:
+                print 'wrong id value'
+                continue
+            else:
+                break
         self.id = id
 
     def __connect(self):
@@ -82,7 +89,6 @@ class Client:
             self.__set_user_info()
 
             ## recv accepted or denied
-            msg = {m_format.ID : self.id, m_format.ACTION : '', m_format.ACTION_VAL : ''}
             while True:
                 room = raw_input(self.id+" : ")
                 m = m_format.dump(self.id, room)
