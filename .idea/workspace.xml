@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0fd31c12-4267-4ca7-81ee-340070f00a78" name="Default" comment="Second Commit&#10;&#10;간단한 베스킨 라벤스 프로그램을 만들어봤습니다. 플레이어는 랜덤으로 수를 주고 받습니다. 서버에서는 게임을 진행합니다.">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/Chat.iml" afterPath="$PROJECT_DIR$/.idea/Chat.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+    <list default="true" id="0fd31c12-4267-4ca7-81ee-340070f00a78" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/junsu/useTOD/server.py" afterPath="$PROJECT_DIR$/junsu/useTOD/server.py" />
     </list>
     <ignored path="Chat.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -652,7 +649,14 @@
       <option name="project" value="LOCAL" />
       <updated>1467540373180</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Second Commit&#10;&#10;간단한 베스킨 라벤스 프로그램을 만들어봤습니다. 플레이어는 랜덤으로 수를 주고 받습니다. 서버에서는 게임을 진행합니다.">
+      <created>1467540777220</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1467540777220</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -692,13 +696,13 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Second Commit&#10;&#10;간단한 베스킨 라벤스 프로그램을 만들어봤습니다. 플레이어는 랜덤으로 수를 주고 받습니다. 서버에서는 게임을 진행합니다." />
     <MESSAGE value="chatting program&#10;uses json" />
     <MESSAGE value="exit 에러 처리 및 broadcast, out 구현중" />
     <MESSAGE value="out 구현만 남음" />
     <MESSAGE value="jhkjjh" />
     <MESSAGE value="tornado" />
-    <option name="LAST_COMMIT_MESSAGE" value="tornado" />
+    <MESSAGE value="Second Commit&#10;&#10;간단한 베스킨 라벤스 프로그램을 만들어봤습니다. 플레이어는 랜덤으로 수를 주고 받습니다. 서버에서는 게임을 진행합니다." />
+    <option name="LAST_COMMIT_MESSAGE" value="Second Commit&#10;&#10;간단한 베스킨 라벤스 프로그램을 만들어봤습니다. 플레이어는 랜덤으로 수를 주고 받습니다. 서버에서는 게임을 진행합니다." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
