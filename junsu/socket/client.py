@@ -1,7 +1,7 @@
-from socket import *
 import threading
-import m_format
 import time
+
+import m_format
 
 
 class Client:
