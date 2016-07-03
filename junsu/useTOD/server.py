@@ -30,6 +30,10 @@ def chat(sock, fd, event):
     msg = sock.recv(128)
     broadcast(sock, msg)
 
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render('index.html')
+
 class SubHandler(tornado.websocket.WebSocketHandler):
 
     def open(self, *args):
@@ -60,7 +64,9 @@ if __name__ == '__main__':
     io_loop.add_handler(server_sock.fileno(), accept_c, io_loop.READ)
     app = tornado.web.Application([
         (r"/bb", SubHandler),
+        (r"/", MainHandler),
     ])
+    app.listen(8808)
     print "sdfsafasf!!"
 
     io_loop.start()
