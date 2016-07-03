@@ -8,7 +8,7 @@
             if ("WebSocket" in window) {
                 //messageContainer.innerHTML = "WebSocket is supported by your Browser!";
                 console.log("WebSocket is supported by your Browser!");
-                var ws = new WebSocket("ws://localhost:8808/bb?Id=333");
+                var ws = new WebSocket("ws://localhost:8808/bb?Id=123");
                 console.log("Socket is connected!")
 
                 // hand shaking .... ... ..  err uu
@@ -20,7 +20,7 @@
                 ws.onmessage = function (evt) {
                     var received_msg = evt.data;
                     //messageContainer.innerHTML = "Message is received...";
-                    console.log("Message is received...")
+                    console.log(received_msg)
                 };
                 ws.onclose = function() {
                     //messageContainer.innerHTML = "Connection is closed...";

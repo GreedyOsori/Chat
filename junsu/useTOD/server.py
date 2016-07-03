@@ -7,7 +7,7 @@ import tornado.web
 
 S_PORT = 7707
 client_list = []
-
+web_client_list = set()
 
 def accept_client(s_sock, fd, events):
     client_sock, client_addr = s_sock.accept()
@@ -23,6 +23,8 @@ def broadcast(sock, msg):
     for c_sock in client_list:
         if sock != c_sock:
             c_sock.send(msg)
+    for ws in web_client_list:
+        ws.write_message(msg)
 
 
 def chat(sock, fd, event):
@@ -37,6 +39,8 @@ class MainHandler(tornado.web.RequestHandler):
 class SubHandler(tornado.websocket.WebSocketHandler):
 
     def open(self, *args):
+        web_client_list.add(self)
+        self.write_message("It's opened")
         # print self.get_argument("Id")
         # self.id = self.get_argument("Id")
         self.stream.set_nodelay(True)
@@ -67,6 +71,6 @@ if __name__ == '__main__':
         (r"/", MainHandler),
     ])
     app.listen(8808)
-    print "sdfsafasf!!"
+    print "io loop start!!!!!"
 
     io_loop.start()
