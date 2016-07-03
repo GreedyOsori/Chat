@@ -26,7 +26,7 @@ class Client:
 
     def do(self):
 
-        self.client_sock.connect(('127.0.0.1', 7707))
+        self.client_sock.connect(('127.0.0.1', 8000))
 
         self.write_thread.start()
         self.read_thread.start()

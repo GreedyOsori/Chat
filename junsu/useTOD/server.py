@@ -4,6 +4,10 @@ import tornado.websocket
 import tornado
 import socket
 import tornado.web
+from tornado.tcpserver import TCPServer
+from tornado import gen
+import tornado.ioloop
+
 
 S_PORT = 7707
 client_list = []
@@ -57,15 +61,45 @@ class SubHandler(tornado.websocket.WebSocketHandler):
         print 'onClose'
 
 
+class ChatServer(TCPServer):
+
+    def __init__(self):
+        TCPServer.__init__(self)
+        self.clients = []
+
+    @gen.coroutine
+    def handle_stream(self, stream, address):
+        self.clients.append(stream)
+        print address, 'joined'
+        io_loop = tornado.ioloop.IOLoop.current()
+        tornado.ioloop.IOLoop.current().spawn_callback(self.__client_handler__, stream)
+
+    @gen.coroutine
+    def __client_handler__(self, stream):
+        while True :
+            message = yield stream.read_bytes(256, partial=True)
+            for client in self.clients:
+                yield client.write(message)
+            for ws in web_client_list:
+                ws.write_message(message)
+
+
+
 if __name__ == '__main__':
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-    server_sock.bind(("", S_PORT))
-    server_sock.listen(5)
+    ##server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    ##server_sock.bind(("", S_PORT))
+    ##server_sock.listen(5)
+
+
 
     io_loop = tornado.ioloop.IOLoop.current()
     ## set function partially
-    accept_c = functools.partial(accept_client, server_sock)
-    io_loop.add_handler(server_sock.fileno(), accept_c, io_loop.READ)
+    ##accept_c = functools.partial(accept_client, server_sock)
+    ##io_loop.add_handler(server_sock.fileno(), accept_c, io_loop.READ)
+
+    server = ChatServer()
+    server.listen(8000)
+
     app = tornado.web.Application([
         (r"/bb", SubHandler),
         (r"/", MainHandler),
