@@ -67,12 +67,16 @@ class ChatServer(TCPServer):
         TCPServer.__init__(self)
         self.clients = []
 
+
+
     @gen.coroutine
     def handle_stream(self, stream, address):
         self.clients.append(stream)
         print address, 'joined'
         io_loop = tornado.ioloop.IOLoop.current()
         tornado.ioloop.IOLoop.current().spawn_callback(self.__client_handler__, stream)
+
+
 
     @gen.coroutine
     def __client_handler__(self, stream):
